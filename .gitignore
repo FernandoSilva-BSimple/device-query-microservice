@@ -1,0 +1,36 @@
+# Build
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+
+# User-specific
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+.history/
+
+# Rider
+.idea/
+
+# Test results
+TestResults/
+*.TestResults/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+*.nuspec
+
+# Logs
+*.log
+
+# Others
+*.DS_Store
+Thumbs.db

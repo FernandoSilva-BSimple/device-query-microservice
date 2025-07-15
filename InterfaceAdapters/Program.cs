@@ -2,6 +2,7 @@ using Application.DTO;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Factory;
+using Domain.Interfaces;
 using Domain.IRepository;
 using Domain.Models;
 using Infrastructure;
@@ -35,6 +36,8 @@ builder.Services.AddAutoMapper(cfg =>
 {
     //DTO
     cfg.CreateMap<Device, DeviceDTO>();
+    cfg.CreateMap<IDevice, DeviceDTO>();
+    cfg.CreateMap<DeviceDTO, IDevice>();
     cfg.CreateMap<DeviceDTO, Device>();
 });
 

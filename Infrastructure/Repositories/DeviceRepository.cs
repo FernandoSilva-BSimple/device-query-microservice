@@ -2,7 +2,6 @@ using AutoMapper;
 using Domain.Factory;
 using Domain.Interfaces;
 using Domain.IRepository;
-using Domain.Models;
 using Infrastructure.DataModel;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,12 +9,14 @@ namespace Infrastructure.Repositories;
 
 public class DeviceRepository : IDeviceRepository
 {
+    private readonly IMapper _mapper;
     private readonly DeviceContext _context;
     private readonly IDeviceFactory _deviceFactory;
-    public DeviceRepository(DeviceContext context, IDeviceFactory deviceFactory)
+    public DeviceRepository(DeviceContext context, IDeviceFactory deviceFactory, IMapper mapper)
     {
         _context = context;
         _deviceFactory = deviceFactory;
+        _mapper = mapper;
     }
 
     public async Task<IDevice?> GetByIdAsync(Guid id)
@@ -34,4 +35,12 @@ public class DeviceRepository : IDeviceRepository
         return devices;
     }
 
+    public async Task<IDevice> AddAsync(IDevice device)
+    {
+        var deviceDM = _mapper.Map<DeviceDataModel>(device);
+        _context.Set<DeviceDataModel>().Add(deviceDM);
+        await _context.SaveChangesAsync();
+        var deviceAdded = _deviceFactory.CreateDevice(deviceDM);
+        return deviceAdded;
+    }
 }

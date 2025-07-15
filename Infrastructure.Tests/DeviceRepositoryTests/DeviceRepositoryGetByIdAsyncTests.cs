@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain.Factory;
 using Domain.Interfaces;
 using Domain.Models;
@@ -41,7 +42,9 @@ public class DeviceRepositoryGetByIdAsyncTests : RepositoryTestBase
         factoryMock.Setup(f => f.CreateDevice(It.Is<DeviceDataModel>(dm => dm.Id == id)))
                     .Returns(deviceDouble.Object);
 
-        var repo = new DeviceRepository(context, factoryMock.Object);
+        var mapperDouble = new Mock<IMapper>();
+
+        var repo = new DeviceRepository(context, factoryMock.Object, mapperDouble.Object);
 
         // Act
         var result = await repo.GetByIdAsync(id);
@@ -69,11 +72,12 @@ public class DeviceRepositoryGetByIdAsyncTests : RepositoryTestBase
         await context.SaveChangesAsync();
 
         var factoryMock = new Mock<IDeviceFactory>();
+        var mapperDouble = new Mock<IMapper>();
 
-        var repository = new DeviceRepository(context, factoryMock.Object);
+        var repo = new DeviceRepository(context, factoryMock.Object, mapperDouble.Object);
 
         // Act
-        var result = await repository.GetByIdAsync(Guid.NewGuid());
+        var result = await repo.GetByIdAsync(Guid.NewGuid());
 
         // Assert
         Assert.Null(result);

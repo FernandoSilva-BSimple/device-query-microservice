@@ -1,32 +1,52 @@
-/*using Application.Interfaces;
+using Application.DTO;
+using Application.Interfaces;
+using AutoMapper;
 using Domain.Interfaces;
 using Domain.IRepository;
+using Domain.Models;
 
 namespace Application.Services;
 
 public class DeviceService : IDeviceService
 {
     private readonly IDeviceRepository _deviceRepository;
+    private readonly IMapper _mapper;
 
-    public DeviceService(IDeviceRepository deviceRepository)
+    public DeviceService(IDeviceRepository deviceRepository, IMapper mapper)
     {
         _deviceRepository = deviceRepository;
+        _mapper = mapper;
     }
 
-    public async Task<Result<IEnumerable<IDevice>>> GetAllAsync()
+    public async Task<Result<IEnumerable<DeviceDTO>>> GetAllAsync()
     {
         var devices = await _deviceRepository.GetAllAsync();
-        return Result<IEnumerable<IDevice>>.Success(devices);
+
+        var devicesDTO = devices.Select(_mapper.Map<DeviceDTO>);
+
+        return Result<IEnumerable<DeviceDTO>>.Success(devicesDTO);
     }
 
-    public async Task<Result<IDevice>> GetByIdAsync(Guid id)
+    public async Task<Result<DeviceDTO>> GetByIdAsync(Guid id)
     {
         var device = await _deviceRepository.GetByIdAsync(id);
 
         if (device is null)
-            return Result<IDevice>.Failure(Error.NotFound("Device not found."));
+            return Result<DeviceDTO>.Failure(Error.NotFound("Device not found."));
 
-        return Result<IDevice>.Success(device);
+        var deviceDTO = _mapper.Map<DeviceDTO>(device);
+
+        return Result<DeviceDTO>.Success(deviceDTO);
+    }
+
+    public async Task<Result<DeviceDTO>> AddConsumedDeviceAsync(DeviceDTO deviceDTO)
+    {
+        var device = _mapper.Map<IDevice>(deviceDTO);
+
+        var deviceCreated = await _deviceRepository.AddAsync(device);
+
+        var createdDeviceDTO = _mapper.Map<DeviceDTO>(deviceCreated);
+
+        return Result<DeviceDTO>.Success(createdDeviceDTO);
     }
 }
-*/

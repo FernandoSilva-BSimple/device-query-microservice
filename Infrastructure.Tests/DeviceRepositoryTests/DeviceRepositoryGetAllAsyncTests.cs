@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain.Factory;
 using Domain.Interfaces;
 using Domain.Models;
@@ -32,6 +33,8 @@ public class DeviceRepositoryGetAllAsyncTests : RepositoryTestBase
             SerialNumber = "serial2"
         };
 
+        var mapperDouble = new Mock<IMapper>();
+
         context.Devices.AddRange(deviceDM1, deviceDM2);
         await context.SaveChangesAsync();
 
@@ -42,7 +45,7 @@ public class DeviceRepositoryGetAllAsyncTests : RepositoryTestBase
         factoryMock.Setup(f => f.CreateDevice(deviceDM1)).Returns(expected1);
         factoryMock.Setup(f => f.CreateDevice(deviceDM2)).Returns(expected2);
 
-        var repository = new DeviceRepository(context, factoryMock.Object);
+        var repository = new DeviceRepository(context, factoryMock.Object, mapperDouble.Object);
 
         // Act
         var result = (await repository.GetAllAsync()).ToList();
@@ -58,7 +61,8 @@ public class DeviceRepositoryGetAllAsyncTests : RepositoryTestBase
     {
         // Arrange
         var factoryMock = new Mock<IDeviceFactory>();
-        var repository = new DeviceRepository(context, factoryMock.Object);
+        var mapperDouble = new Mock<IMapper>();
+        var repository = new DeviceRepository(context, factoryMock.Object, mapperDouble.Object);
 
         // Act
         var result = await repository.GetAllAsync();

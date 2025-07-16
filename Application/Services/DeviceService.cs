@@ -41,7 +41,7 @@ public class DeviceService : IDeviceService
 
     public async Task<Result<DeviceDTO>> AddConsumedDeviceAsync(DeviceDTO deviceDTO)
     {
-        var device = _mapper.Map<IDevice>(deviceDTO);
+        IDevice device = _mapper.Map<Device>(deviceDTO);
 
         var deviceCreated = await _deviceRepository.AddAsync(device);
 

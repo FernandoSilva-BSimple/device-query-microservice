@@ -37,7 +37,6 @@ builder.Services.AddAutoMapper(cfg =>
     //DTO
     cfg.CreateMap<Device, DeviceDTO>();
     cfg.CreateMap<IDevice, DeviceDTO>();
-    cfg.CreateMap<DeviceDTO, IDevice>();
     cfg.CreateMap<DeviceDTO, Device>();
 });
 

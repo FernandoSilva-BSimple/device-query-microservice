@@ -11,14 +11,12 @@ namespace Application.Tests.DeviceServiceTests;
 
 public class AddConsumedDeviceTestsAsync
 {
-
     [Fact]
     public async Task AddConsumedDeviceAsync_ShouldCreateAndAddDevice_WhenDeviceDoesNotExist()
     {
         // Arrange
         var mapperDouble = new Mock<IMapper>();
         var deviceRepoDouble = new Mock<IDeviceRepository>();
-        var deviceFactoryDouble = new Mock<IDeviceFactory>();
 
         var deviceId = Guid.NewGuid();
         var description = "Work laptop";
@@ -27,35 +25,17 @@ public class AddConsumedDeviceTestsAsync
         var serialNumber = "1234567890";
 
         var deviceDTO = new DeviceDTO(deviceId, description, brand, model, serialNumber);
+        var mappedDeviceMock = new Mock<Device>(deviceId, description, brand, model, serialNumber);
 
-        var deviceMock = new Mock<IDevice>();
-        deviceMock.Setup(d => d.Id).Returns(deviceId);
-        deviceMock.Setup(d => d.Description).Returns(description);
-        deviceMock.Setup(d => d.Brand).Returns(brand);
-        deviceMock.Setup(d => d.Model).Returns(model);
-        deviceMock.Setup(d => d.SerialNumber).Returns(serialNumber);
+        mapperDouble.Setup(m => m.Map<Device>(deviceDTO)).Returns(mappedDeviceMock.Object);
 
-        mapperDouble.Setup(m => m.Map<IDevice>(deviceDTO)).Returns(deviceMock.Object);
+        var createdDeviceMock = new Mock<Device>(deviceId, description, brand, model, serialNumber);
+        deviceRepoDouble.Setup(dr => dr.AddAsync(mappedDeviceMock.Object)).ReturnsAsync(createdDeviceMock.Object);
 
-        var deviceCreatedMock = new Mock<IDevice>();
-        deviceCreatedMock.Setup(d => d.Id).Returns(deviceId);
-        deviceCreatedMock.Setup(d => d.Description).Returns(description);
-        deviceCreatedMock.Setup(d => d.Brand).Returns(brand);
-        deviceCreatedMock.Setup(d => d.Model).Returns(model);
-        deviceCreatedMock.Setup(d => d.SerialNumber).Returns(serialNumber);
+        var expectedDTO = new DeviceDTO(createdDeviceMock.Object.Id, createdDeviceMock.Object.Description, createdDeviceMock.Object.Brand, createdDeviceMock.Object.Model, createdDeviceMock.Object.SerialNumber);
+        mapperDouble.Setup(m => m.Map<DeviceDTO>(createdDeviceMock.Object)).Returns(expectedDTO);
 
-        deviceRepoDouble
-            .Setup(dr => dr.AddAsync(deviceMock.Object))
-            .ReturnsAsync(deviceCreatedMock.Object);
-
-        var createdDeviceDTO = new DeviceDTO(deviceCreatedMock.Object.Id, deviceCreatedMock.Object.Description, deviceCreatedMock.Object.Brand, deviceCreatedMock.Object.Model, deviceCreatedMock.Object.SerialNumber);
-
-        mapperDouble.Setup(m => m.Map<DeviceDTO>(deviceCreatedMock.Object)).Returns(createdDeviceDTO);
-
-        var service = new DeviceService(
-            deviceRepoDouble.Object,
-            mapperDouble.Object
-        );
+        var service = new DeviceService(deviceRepoDouble.Object, mapperDouble.Object);
 
         // Act
         var result = await service.AddConsumedDeviceAsync(deviceDTO);
@@ -63,15 +43,14 @@ public class AddConsumedDeviceTestsAsync
         // Assert
         Assert.NotNull(result);
         Assert.True(result.IsSuccess);
-        Assert.Equal(createdDeviceDTO.Id, result.Value.Id);
-        Assert.Equal(createdDeviceDTO.Description, result.Value.Description);
-        Assert.Equal(createdDeviceDTO.Brand, result.Value.Brand);
-        Assert.Equal(createdDeviceDTO.Model, result.Value.Model);
-        Assert.Equal(createdDeviceDTO.SerialNumber, result.Value.SerialNumber);
+        Assert.Equal(expectedDTO.Id, result.Value.Id);
+        Assert.Equal(expectedDTO.Description, result.Value.Description);
+        Assert.Equal(expectedDTO.Brand, result.Value.Brand);
+        Assert.Equal(expectedDTO.Model, result.Value.Model);
+        Assert.Equal(expectedDTO.SerialNumber, result.Value.SerialNumber);
 
-        deviceRepoDouble.Verify(dr => dr.AddAsync(deviceMock.Object), Times.Once);
-        mapperDouble.Verify(m => m.Map<DeviceDTO>(deviceCreatedMock.Object), Times.Once);
-        mapperDouble.Verify(m => m.Map<IDevice>(deviceDTO), Times.Once);
-
+        mapperDouble.Verify(m => m.Map<Device>(deviceDTO), Times.Once);
+        mapperDouble.Verify(m => m.Map<DeviceDTO>(createdDeviceMock.Object), Times.Once);
+        deviceRepoDouble.Verify(dr => dr.AddAsync(mappedDeviceMock.Object), Times.Once);
     }
 }
